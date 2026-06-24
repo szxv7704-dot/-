@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>행정정보 통합관리 기본법</title>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin: 20px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        #articlesContainer {
+            margin-top: 20px;
+        }
+
+        #articlesContainer div {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        #articlesContainer strong {
+            color: #667eea;
+            font-size: 1.1em;
+        }
+    </style>
+</head>
+<body>
+    <h1>행정정보 통합관리 기본법</h1>
+    <p>조항 검색 시스템</p>
+     
+    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin: 20px 0;">
+        <img src="이미지/카드뉴스1.png" alt="카드뉴스1" style="width: 100%; border-radius: 5px;">
+        <img src="이미지/카드뉴스2.png" alt="카드뉴스2" style="width: 100%; border-radius: 5px;">
+        <img src="이미지/카드뉴스3.png" alt="카드뉴스3" style="width: 100%; border-radius: 5px;">
+    </div>
+    <input type="text" id="searchInput" placeholder="조항 검색...">
+    
+    <p>결과 <span id="resultCount">0</span>건</p>
+    
+    <div id="articlesContainer"></div>
+
+    <script>
+        let allArticles = [];
+
+        async function loadArticles() {
+            try {
+                const response = await fetch('조항데이터.json');
+                allArticles = await response.json();
+                renderArticles(allArticles);
+            } catch (error) {
+                console.error('오류:', error);
+                document.getElementById('articlesContainer').innerHTML = 
+                    '<p>데이터를 불러올 수 없습니다. 조항데이터.json 파일을 확인하세요.</p>';
+            }
+        }
+
+        function renderArticles(articles) {
+            const container = document.getElementById('articlesContainer');
+            const resultCount = document.getElementById('resultCount');
+
+            if (articles.length === 0) {
+                container.innerHTML = '<p>검색 결과가 없습니다.</p>';
+                resultCount.textContent = '0';
+                return;
+            }
+
+            container.innerHTML = articles.map(article => `
+                <div>
+                    <strong>${article.조}</strong> - ${article.제목}
+                    <p>${article.본문}</p>
+                </div>
+            `).join('');
+
+            resultCount.textContent = articles.length;
+        }
+
+        function filterArticles(keyword) {
+            if (!keyword.trim()) {
+                renderArticles(allArticles);
+                return;
+            }
+
+            const filtered = allArticles.filter(article => 
+                article.제목.includes(keyword) || article.본문.includes(keyword)
+            );
+
+            renderArticles(filtered);
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            filterArticles(e.target.value);
+        });
+
+        loadArticles();
+    </script>
+</body>
+</html>
